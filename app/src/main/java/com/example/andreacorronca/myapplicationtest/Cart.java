@@ -1,0 +1,192 @@
+package com.example.andreacorronca.myapplicationtest;
+
+import android.content.Intent;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.DecimalFormat;
+
+public class Cart extends AppCompatActivity {
+
+    private DrawerLayout mDrawerLayout;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_cart);
+
+        AquaData app1 = (AquaData)getApplication();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View header = navigationView.getHeaderView(0) ;
+        header.findViewById(R.id.nomeUtente);
+        TextView nomeUtente = (TextView) header.findViewById(R.id.nomeUtente);
+        Menu menu = navigationView.getMenu();
+
+        MenuItem libreria = menu.findItem(R.id.libreria);
+        MenuItem listaDeiDesideri = menu.findItem(R.id.listaDesideri);
+        libreria.setTitle("Libreria (" + app1.getLibrary().size() + ")");
+        listaDeiDesideri.setTitle("Lista dei desideri (" + app1.getWishList().size() + ")");
+
+
+        nomeUtente.setText(app1.getUserName());
+
+        Toolbar toolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        //menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+                        switch (menuItem.getItemId()){
+
+                            case R.id.catalogo :
+                                Intent boh = new Intent(getBaseContext(),Home.class);
+                                startActivity(boh);
+                                break;
+
+                            case R.id.libreria :
+                                Intent boh5 = new Intent(getBaseContext(),Library.class);
+                                startActivity(boh5);
+                                break;
+
+
+                            case R.id.listaDesideri :
+                                Intent boh2 = new Intent(getBaseContext(),WishList.class);
+                                startActivity(boh2);
+                                break;
+
+                            case R.id.impostazioni :
+                                Intent boh3 = new Intent(getBaseContext(),AdviceSettings.class);
+                                boh3.putExtra("home",1);
+                                startActivity(boh3);
+                                break;
+
+                            case R.id.esci :
+                                Intent boh4 = new Intent(getBaseContext(),Login.class);
+                                startActivity(boh4);
+                                break;
+                        }
+
+                        return true;
+                    }
+                });
+
+
+        TextView cartCount = findViewById(R.id.cart_count);
+
+        TextView totale = findViewById(R.id.totale);
+
+        cartCount.setText("Giochi nel carrello:" + app1.getCart().size());
+
+        GameResultsAdapter adapter = new GameResultsAdapter(this, app1.getCart(),app1);
+
+        ListView listView = findViewById(R.id.list);
+
+        listView.setAdapter(adapter);
+
+        DecimalFormat decFormat = new DecimalFormat("#.##");
+
+        totale.setText("Acquista : Totale " + decFormat.format(Game.getTotalPrice(app1.getCart()))  + "€");
+
+    }
+
+    public void addToLibrary(View v)
+    {
+        TextView cartCount = findViewById(R.id.cart_count);
+
+        TextView totale = findViewById(R.id.totale);
+
+        ListView listView = findViewById(R.id.list);
+
+        AquaData app1 = (AquaData)getApplication();
+
+        if (app1.getCart().size()>0){
+            app1.getLibrary().addAll(app1.getCart());
+            for (Game game : app1.getCart()){
+                app1.getVotes().put(game.getId(),101);
+            }
+            app1.getWishList().removeAll(app1.getCart());
+            app1.getCart().clear();
+            CharSequence message = "i giochi sono stati aggiunti alla libreria";
+            Toast toast = Toast.makeText(this,message,message.length());
+            toast.show();
+            cartCount.setText("Giochi nel carrello:0");
+            totale.setText("Acquista : Totale 0.0€");
+            listView.setAdapter(null);
+
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            Menu menu = navigationView.getMenu();
+
+            MenuItem libreria = menu.findItem(R.id.libreria);
+            libreria.setTitle("Libreria (" + app1.getLibrary().size() + ")");
+        }
+        else{
+            CharSequence message = "il carrello e' vuoto";
+            Toast toast = Toast.makeText(this,message,message.length());
+            toast.show();
+        }
+    }
+
+    public void onRestart()
+    {
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void onBackPressed() {
+
+        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        }
+        else {
+            finish();
+        }
+
+        /*switch (getIntent().getIntExtra("home",0)){
+            case 1:
+                Intent intent = new Intent(this,Home.class);
+                startActivity(intent);
+                break;
+
+            default:
+                finish();
+                break;
+        }*/
+    }
+}

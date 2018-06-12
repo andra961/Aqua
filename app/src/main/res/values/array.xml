@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="preferences_array">
+        <item>nullo</item>
+        <item>basso</item>
+        <item>medio</item>
+        <item>alto</item>
+        <item>massimo</item>
+    </string-array>
+
+    <string-array name="sort_order_array">
+        <item>crescente</item>
+        <item>decrescente</item>
+    </string-array>
+</resources>
